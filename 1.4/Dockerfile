@@ -4,7 +4,7 @@ MAINTAINER Ratnadeep Debnath <ratnadeep.debnath@zapier.com>
 ENV VERSION 1.4.14
 
 RUN apt-get update && \
-    apt-get install -y wget mysql-client inotify-tools procps && \
+    apt-get install -y wget mysql-client inotify-tools procps gettext-base && \
     wget https://github.com/sysown/proxysql/releases/download/v${VERSION}/proxysql_${VERSION}-debian9_amd64.deb -O /opt/proxysql_${VERSION}-debian9_amd64.deb && \
     dpkg -i /opt/proxysql_${VERSION}-debian9_amd64.deb && \
     rm -f /opt/proxysql_${VERSION}-debian9_amd64.deb && \
