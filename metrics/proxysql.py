@@ -227,15 +227,21 @@ class ProxySQLMetrics:
                 db.close()
 
     def _submit_metric(self, metric_name, metric_type, metric_value, metric_tags):
+        print(u"Submitting metric: {}, {}, {}, {}".format(
+            metric_name, metric_type, metric_value, metric_tags))
+
         if metric_value is None:
             return
 
         if metric_type == RATE:
+            print(u"Submitted")
             statsd.increment(metric_name, metric_value, tags=metric_tags)
         elif metric_type == GAUGE:
+            print(u"Submitted")
             statsd.gauge(metric_name, metric_value, tags=metric_tags)
 
 if __name__ == '__main__':
+    print("Starting proxysql metrics collection...")
     check_interval = int(os.environ.get('PROXYSQL_CHECK_INTERVAL'))
     metrics = ProxySQLMetrics()
 
