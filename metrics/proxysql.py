@@ -91,7 +91,7 @@ class ProxySQLMetrics:
     def _collect_metrics(self, conn, tags, options):
         """Collects all the different types of ProxySQL metrics and submits them to Datadog"""
         global_stats = self._get_global_stats(conn)
-        for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_GLOBAL.iteritems():
+        for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_GLOBAL.items():
             metric_name, metric_type = metric_details
             metric_tags = list(tags)
             self._submit_metric(metric_name, metric_type, int(global_stats.get(proxysql_metric_name)), metric_tags)
@@ -99,7 +99,7 @@ class ProxySQLMetrics:
         report_command_counters = options.get('extra_command_counter_metrics', True)
         if report_command_counters:
             command_counters = self._get_command_counters(conn)
-            for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_COMMAND_COUNTERS.iteritems():
+            for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_COMMAND_COUNTERS.items():
                 metric_name, metric_type = metric_details
                 metric_tags = list(tags)
                 self._submit_metric(metric_name, metric_type,
@@ -108,7 +108,7 @@ class ProxySQLMetrics:
         report_conn_pool_stats = options.get('extra_connection_pool_metrics', True)
         if report_conn_pool_stats:
             conn_pool_stats = self._get_connection_pool_stats(conn)
-            for proxysql_metric_name, metric_details in PROXYSQL_CONNECTION_POOL_STATS.iteritems():
+            for proxysql_metric_name, metric_details in PROXYSQL_CONNECTION_POOL_STATS.items():
                 metric_name, metric_type = metric_details
 
                 for metric in conn_pool_stats.get(proxysql_metric_name):
