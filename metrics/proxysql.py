@@ -94,7 +94,7 @@ class ProxySQLMetrics:
         for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_GLOBAL.items():
             metric_name, metric_type = metric_details
             metric_tags = list(tags)
-            self._submit_metric(metric_name, metric_type, int(global_stats.get(proxysql_metric_name)), metric_tags)
+            self._submit_metric(metric_name, metric_type, float(global_stats.get(proxysql_metric_name)), metric_tags)
 
         report_command_counters = options.get('extra_command_counter_metrics', True)
         if report_command_counters:
@@ -103,7 +103,7 @@ class ProxySQLMetrics:
                 metric_name, metric_type = metric_details
                 metric_tags = list(tags)
                 self._submit_metric(metric_name, metric_type,
-                                    int(command_counters.get(proxysql_metric_name)), metric_tags)
+                                    float(command_counters.get(proxysql_metric_name)), metric_tags)
 
         report_conn_pool_stats = options.get('extra_connection_pool_metrics', True)
         if report_conn_pool_stats:
@@ -116,7 +116,7 @@ class ProxySQLMetrics:
                     tag, value = metric
                     if tag:
                         metric_tags.append(tag)
-                    self._submit_metric(metric_name, metric_type, int(value), metric_tags)
+                    self._submit_metric(metric_name, metric_type, float(value), metric_tags)
 
     def _get_global_stats(self, conn):
         """Fetch the global ProxySQL stats."""
