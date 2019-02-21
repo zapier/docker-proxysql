@@ -244,12 +244,19 @@ if __name__ == '__main__':
     check_interval = int(os.environ.get('PROXYSQL_CHECK_INTERVAL'))
     metrics = ProxySQLMetrics()
 
+    tags = [
+        'helm_release:' + os.environ.get('RELEASE_NAME', ''),
+        'pod_name:' + os.environ.get('POD_NAME', ''),
+        'environment:' + os.environ.get('ENVIRONMENT', 'local'),
+    ]
+
     while True:
         instance = {
             'server': os.environ.get('PROXYSQL_ADMIN_HOST'),
             'port': int(os.environ.get('PROXYSQL_ADMIN_PORT')),
             'user': os.environ.get('PROXYSQL_ADMIN_USER'),
             'pass': os.environ.get('PROXYSQL_ADMIN_PASSWORD'),
+            'tags': tags,
             'connect_timeout': 10,
         }
 
