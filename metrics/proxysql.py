@@ -13,8 +13,7 @@ import time
 import pymysql
 import pymysql.cursors
 
-# project
-from datadog import statsd
+from datadog.dogstatsd.base import DogStatsd
 
 GAUGE = "gauge"
 RATE = "rate"
@@ -72,7 +71,7 @@ PROXYSQL_CONNECTION_POOL_STATS = {
 class ProxySQLMetrics:
 
     def __init__(self):
-        pass
+        self.dogstatsd = DogStatsd(host=os.environ.get('DATADOG_HOST'), port=os.environ.get('DATADOG_PORT'))
 
     def check(self, instance):
         host, port, user, password, tags, options, connect_timeout = self._get_config(instance)
@@ -235,10 +234,10 @@ class ProxySQLMetrics:
 
         if metric_type == RATE:
             print(u"Submitted")
-            statsd.increment(metric_name, metric_value, tags=metric_tags)
+            self.dogstatsd.increment(metric_name, metric_value, tags=metric_tags)
         elif metric_type == GAUGE:
             print(u"Submitted")
-            statsd.gauge(metric_name, metric_value, tags=metric_tags)
+            self.dogstatsd.gauge(metric_name, metric_value, tags=metric_tags)
 
 if __name__ == '__main__':
     print("Starting proxysql metrics collection...")
