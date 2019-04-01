@@ -6,6 +6,7 @@
 from contextlib import closing, contextmanager
 from collections import defaultdict
 
+import logging
 import os
 import time
 
@@ -14,6 +15,10 @@ import pymysql
 import pymysql.cursors
 
 from datadog.dogstatsd.base import DogStatsd
+
+logger = logging.getLogger()
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(os.environ.get('LOGLEVEL', 'INFO'))
 
 GAUGE = "gauge"
 RATE = "rate"
@@ -84,7 +89,7 @@ class ProxySQLMetrics:
                 # Metric Collection
                 self._collect_metrics(conn, tags, options)
             except Exception as e:
-                print("Error!")
+                logger.error("ProxySQL collect metrics error: %s" % e, exc_info=True)
                 raise e
 
     def _collect_metrics(self, conn, tags, options):
@@ -126,12 +131,12 @@ class ProxySQLMetrics:
                 cursor.execute(sql)
 
                 if cursor.rowcount < 1:
-                    print("Failed to fetch records from the stats schema 'stats_mysql_global' table.")
+                    logger.debug("Failed to fetch records from the stats schema 'stats_mysql_global' table.")
                     return None
 
                 return {row['Variable_Name']: row['Variable_Value'] for row in cursor.fetchall()}
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            print("ProxySQL global stats unavailable at this time: %s" % str(e))
+            logger.debug("ProxySQL global stats unavailable at this time: %s" % str(e))
             return None
 
     def _get_command_counters(self, conn):
@@ -145,7 +150,7 @@ class ProxySQLMetrics:
                 cursor.execute(sql)
 
                 if cursor.rowcount < 1:
-                    print("Failed to fetch records from the stats schema 'stats_mysql_commands_counters' table.")
+                    logger.debug("Failed to fetch records from the stats schema 'stats_mysql_commands_counters' table.")
                     return None
 
                 row = cursor.fetchone()
@@ -155,7 +160,7 @@ class ProxySQLMetrics:
                     'Query_count': row['query_count']
                 }
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            print("ProxySQL commands_counters stats unavailable at this time: %s" % str(e))
+            logger.debug("ProxySQL commands_counters stats unavailable at this time: %s" % str(e))
             return None
 
     def _get_connection_pool_stats(self, conn):
@@ -167,7 +172,7 @@ class ProxySQLMetrics:
                 cursor.execute(sql)
 
                 if cursor.rowcount < 1:
-                    print("Failed to fetch records from the stats schema 'stats_mysql_commands_counters' table.")
+                    logger.debug("Failed to fetch records from the stats schema 'stats_mysql_commands_counters' table.")
                     return None
 
                 stats = defaultdict(list)
@@ -189,7 +194,7 @@ class ProxySQLMetrics:
 
                 return stats
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
-            print("ProxySQL commands_counters stats unavailable at this time: %s" % str(e))
+            logger.debug("ProxySQL commands_counters stats unavailable at this time: %s" % str(e))
             return None
 
     @staticmethod
@@ -217,7 +222,7 @@ class ProxySQLMetrics:
                 connect_timeout=connect_timeout,
                 cursorclass=pymysql.cursors.DictCursor
             )
-            print("Connected to ProxySQL")
+            logger.debug("Connected to ProxySQL")
             yield db
         except Exception:
             raise
@@ -226,21 +231,21 @@ class ProxySQLMetrics:
                 db.close()
 
     def _submit_metric(self, metric_name, metric_type, metric_value, metric_tags):
-        print(u"Submitting metric: {}, {}, {}, {}".format(
+        logger.debug(u"Submitting metric: {}, {}, {}, {}".format(
             metric_name, metric_type, metric_value, metric_tags))
 
         if metric_value is None:
             return
 
         if metric_type == RATE:
-            print(u"Submitted")
+            logger.debug(u"Submitted")
             self.dogstatsd.increment(metric_name, metric_value, tags=metric_tags)
         elif metric_type == GAUGE:
-            print(u"Submitted")
+            logger.debug(u"Submitted")
             self.dogstatsd.gauge(metric_name, metric_value, tags=metric_tags)
 
 if __name__ == '__main__':
-    print("Starting proxysql metrics collection...")
+    logger.info("Starting proxysql metrics collection...")
     check_interval = int(os.environ.get('PROXYSQL_CHECK_INTERVAL'))
     metrics = ProxySQLMetrics()
 
@@ -251,14 +256,17 @@ if __name__ == '__main__':
     ]
 
     while True:
-        instance = {
-            'server': os.environ.get('PROXYSQL_ADMIN_HOST'),
-            'port': int(os.environ.get('PROXYSQL_ADMIN_PORT')),
-            'user': os.environ.get('PROXYSQL_ADMIN_USER'),
-            'pass': os.environ.get('PROXYSQL_ADMIN_PASSWORD'),
-            'tags': tags,
-            'connect_timeout': 10,
-        }
+        try:
+            instance = {
+                'server': os.environ.get('PROXYSQL_ADMIN_HOST'),
+                'port': int(os.environ.get('PROXYSQL_ADMIN_PORT')),
+                'user': os.environ.get('PROXYSQL_ADMIN_USER'),
+                'pass': os.environ.get('PROXYSQL_ADMIN_PASSWORD'),
+                'tags': tags,
+                'connect_timeout': 10,
+            }
 
-        metrics.check(instance)
-        time.sleep(check_interval)
+            metrics.check(instance)
+            time.sleep(check_interval)
+        except Exception as e:
+            logger.error("Handling proxysql metrics check error: %s" % e, exc_info=True)
