@@ -16,8 +16,13 @@ fi
 
 trap handle_term SIGTERM
 
+PROXYSQL_SHUTDOWN_GRACE_PERIOD=${PROXYSQL_SHUTDOWN_GRACE_PERIOD:=20}
+
 handle_term() {
-    echo "SIGTERM received... Shutting down proxysql gracefully..."
+    echo "SIGTERM received..."
+    echo "Waiting for $PROXYSQL_SHUTDOWN_GRACE_PERIOD seconds to existing connections to complete..."
+    sleep $PROXYSQL_SHUTDOWN_GRACE_PERIOD
+    echo "Killing ProxySQL..."
     pkill -f proxysql
     echo "Exit code of proxysql: $?"
     exit 0
