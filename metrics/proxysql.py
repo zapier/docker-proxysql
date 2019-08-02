@@ -95,10 +95,11 @@ class ProxySQLMetrics:
     def _collect_metrics(self, conn, tags, options):
         """Collects all the different types of ProxySQL metrics and submits them to Datadog"""
         global_stats = self._get_global_stats(conn)
-        for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_GLOBAL.items():
-            metric_name, metric_type = metric_details
-            metric_tags = list(tags)
-            self._submit_metric(metric_name, metric_type, float(global_stats.get(proxysql_metric_name)), metric_tags)
+        if global_stats:
+            for proxysql_metric_name, metric_details in PROXYSQL_MYSQL_STATS_GLOBAL.items():
+                metric_name, metric_type = metric_details
+                metric_tags = list(tags)
+                self._submit_metric(metric_name, metric_type, float(global_stats.get(proxysql_metric_name)), metric_tags)
 
         report_command_counters = options.get('extra_command_counter_metrics', True)
         if report_command_counters:
