@@ -1,7 +1,7 @@
 FROM debian:stretch
 MAINTAINER Ratnadeep Debnath <ratnadeep.debnath@zapier.com>
 
-ENV VERSION 2.0.4
+ENV VERSION 2.0.6
 
 RUN apt-get update && \
     apt-get install -y wget mysql-client inotify-tools procps gettext-base && \
