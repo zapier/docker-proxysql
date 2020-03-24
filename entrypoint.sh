@@ -14,4 +14,4 @@ if [ "${1:0:1}" = '-' ]; then
 	CMDARG="$@"
 fi
 
-exec proxysql -f $CMDARG &
+exec proxysql -f $CMDARG
