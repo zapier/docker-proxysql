@@ -10,8 +10,12 @@ RUN apt-get update && \
     rm -f /opt/proxysql_${VERSION}-debian9_amd64.deb && \
     rm -rf /var/lib/apt/lists/*
 
+ENV PROXYSQL_CONF_CHECK_INTERVAL 60
+ENV PROXYSQL_CONF_LIVE_RELOAD true
+
 VOLUME /var/lib/proxysql
 EXPOSE 6032 6033 6034
 
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["proxysql", "-f"]
