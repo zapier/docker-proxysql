@@ -30,6 +30,7 @@ RUN mkdir -p $PROXYSQL_WORKDIR
 # env var subsitutions to be rendered from env vars and env vars loaded
 # from $PROXYSQL_WORKDIR/secrets/secrets.env
 COPY proxysql.cnf.tpl $PROXYSQL_WORKDIR/conf/proxysql.cnf.tpl
+COPY secrets.env $PROXYSQL_WORKDIR/secrets/secrets.env
 
 COPY entrypoint.sh /entrypoint.sh
 

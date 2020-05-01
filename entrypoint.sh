@@ -68,10 +68,6 @@ function configReloader {
 }
 
 function init {
-    mkdir -p $PROXYSQL_CONF_DIR
-    mkdir -p $PROXYSQL_SECRETS_DIR
-    touch $PROXYSQL_CONF_TPL_FILE
-    touch $PROXYSQL_SECRETS_FILE
     loadEnv
     renderProxySQLCnf
     configReloader &
