@@ -46,22 +46,22 @@ function configReloader {
 
     touch $PROXYSQL_CONF_RELOADER_LOCK
     echo "Starting ProxySQL config reloader..."
-    m1=$(md5sum $PROXYSQL_CONF_TPL_FILE)
-    m2=$(md5sum $PROXYSQL_SECRETS_FILE)
+    tpl_hash=$(md5sum $PROXYSQL_CONF_TPL_FILE)
+    secrets_hash=$(md5sum $PROXYSQL_SECRETS_FILE)
 
     while true; do
         sleep $PROXYSQL_CONF_CHECK_INTERVAL
         echo "Checking for ProxySQL config changes..."
-        m1_=$(md5sum $PROXYSQL_CONF_TPL_FILE)
-        m2_=$(md5sum $PROXYSQL_SECRETS_FILE)
-        if [ "$m1" != "$m1_" ] || [ "$m2" != "$m2_" ]; then
+        tpl_hash_=$(md5sum $PROXYSQL_CONF_TPL_FILE)
+        secrets_hash_=$(md5sum $PROXYSQL_SECRETS_FILE)
+        if [ "$tpl_hash" != "$tpl_hash_" ] || [ "$secrets_hash" != "$secrets_hash_" ]; then
             echo "ProxySQL config changed..."
             loadEnv
             renderProxySQLCnf
             loadProxySQLCnf
         fi
-        m1=$m1_
-        m2=$m2_
+        tpl_hash=$tpl_hash_
+        secrets_hash=$secrets_hash_
     done
     rm -rf $PROXYSQL_CONF_RELOADER_LOCK
 }
