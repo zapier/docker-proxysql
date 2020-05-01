@@ -1,0 +1,51 @@
+version: "2"
+
+services:
+  proxysql:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    links:
+      - db1
+      - db2
+    environment:
+      PROXYSQL_CONF_CHECK_INTERVAL: 15
+      PROXYSQL_CONF_LIVE_RELOAD: "true"
+      PROXYSQL_ADMIN_PASSWORD: password
+      PROXYSQL_MYSQL_THREADS: 6
+    ports:
+      # ProxySQL admin port for MySQL commands
+      - "16032:6032"
+      # ProxySQL main port
+      - "16033:6033"
+    volumes:
+      - ./proxysql.cnf.tpl:/proxysql/conf/proxysql.cnf.tpl
+      - ./secrets.env:/proxysql/secrets/secrets.env
+  db1:
+    image: mysql:5.7
+    command: "mysqld --transaction-isolation='repeatable-read' --general-log=ON --general-log-file=/var/lib/mysql/query.log"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: db1
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: app
+    volumes:
+      - ./db1:/var/lib/mysql
+    expose:
+      - "3306"
+    ports:
+      - "13306:3306"
+  db2:
+    image: mysql:5.7
+    command: "mysqld --transaction-isolation='repeatable-read' --general-log=ON --general-log-file=/var/lib/mysql/query.log"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: db2
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: app
+    volumes:
+      - ./db2:/var/lib/mysql
+    expose:
+      - "3306"
+    ports:
+      - "13307:3306"
