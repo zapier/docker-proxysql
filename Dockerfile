@@ -19,11 +19,12 @@ ENV PROXYSQL_ADMIN_PORT "6032"
 ENV PROXYSQL_MYSQL_THREADS 4
 ENV PROXYSQL_MYSQL_STACKSIZE 1048576
 ENV PROXYSQL_MYSQL_INTERFACES "0.0.0.0:6033;/tmp/proxysql.sock"
+ENV PROXYSQL_WORKDIR /proxysql
 
 EXPOSE 6033 6034 6035
 
-RUN mkdir -p /proxysql
-COPY proxysql.cnf.tpl /tmp/proxysql-conf/proxysql.cnf.tpl
+RUN mkdir -p $PROXYSQL_WORKDIR
+COPY proxysql.cnf.tpl $PROXYSQL_WORKDIR/conf/proxysql.cnf.tpl
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
