@@ -10,6 +10,7 @@ RUN apt-get update && \
     rm -f /opt/proxysql_${VERSION}-debian9_amd64.deb && \
     rm -rf /var/lib/apt/lists/*
 
+# Static env variables. Value updates will need container restart to reflect changes
 ENV PROXYSQL_CONF_CHECK_INTERVAL 60
 ENV PROXYSQL_CONF_LIVE_RELOAD true
 ENV PROXYSQL_ADMIN_USERNAME admin
@@ -24,7 +25,12 @@ ENV PROXYSQL_WORKDIR /proxysql
 EXPOSE 6033 6034 6035
 
 RUN mkdir -p $PROXYSQL_WORKDIR
+
+# Template to render /etc/proxysql.cnf. proxysql.cnf.tpl can contain
+# env var subsitutions to be rendered from env vars and env vars loaded
+# from $PROXYSQL_WORKDIR/secrets/secrets.env
 COPY proxysql.cnf.tpl $PROXYSQL_WORKDIR/conf/proxysql.cnf.tpl
+
 COPY entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
