@@ -104,11 +104,11 @@ proxysql_monitor_password=root
 docker run -ti --name proxysql \
 -v secrets.env:/proxysql/secrets/secrets.env \
 -v ./proxysql.cnf.tpl:/proxysql/conf/proxysql.cnf.tpl \
--e PROXYSQL_CONF_CHECK_INTERVAL=15
--e PROXYSQL_CONF_LIVE_RELOAD=true
--e PROXYSQL_ADMIN_PASSWORD=somepassword
--e PROXYSQL_MYSQL_THREADS=6
--p 16032:6032
--p 16033:6033
+-e PROXYSQL_CONF_CHECK_INTERVAL=15 \
+-e PROXYSQL_CONF_LIVE_RELOAD=true \
+-e PROXYSQL_ADMIN_PASSWORD=somepassword \
+-e PROXYSQL_MYSQL_THREADS=6 \
+-p 16032:6032 \
+-p 16033:6033 \
 zapier/proxysql:latest
 ```
